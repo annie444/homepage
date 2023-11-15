@@ -166,7 +166,6 @@ export default function QuickLaunch({
       </span>
     );
   }
-
   return (
     <div
       className={classNames(

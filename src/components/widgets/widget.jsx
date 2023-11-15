@@ -17,15 +17,19 @@ const widgetMappings = {
   kubernetes: dynamic(() => import("components/widgets/kubernetes/kubernetes")),
 };
 
-export default function Widget({ widget, style }) {
+export default function Widget({ widget, style, access }) {
   const InfoWidget = widgetMappings[widget.type];
 
-  if (InfoWidget) {
+  if (InfoWidget && access && access.includes(widget.options.access)) {
     return (
       <ErrorBoundary>
         <InfoWidget options={{ ...widget.options, style }} />
       </ErrorBoundary>
     );
+  }
+
+  if (InfoWidget) {
+    return <div />
   }
 
   return (

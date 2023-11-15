@@ -4,7 +4,7 @@ import { columnMap } from "../../utils/layout/columns";
 
 import Item from "components/bookmarks/item";
 
-export default function List({ bookmarks, layout }) {
+export default function List({ bookmarks, layout, access }) {
   return (
     <ul
       className={classNames(
@@ -13,7 +13,7 @@ export default function List({ bookmarks, layout }) {
       )}
     >
       {bookmarks.map((bookmark) => (
-        <Item key={`${bookmark.name}-${bookmark.href}`} bookmark={bookmark} />
+        <Item key={`${bookmark.name}-${bookmark.href}`} bookmark={bookmark} access={access} />
       ))}
     </ul>
   );

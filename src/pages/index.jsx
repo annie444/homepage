@@ -8,6 +8,7 @@ import { useEffect, useContext, useState, useMemo } from "react";
 import { BiError } from "react-icons/bi";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 import Tab, { slugify } from "components/tab";
 import FileContent from "components/filecontent";
@@ -27,6 +28,7 @@ import ErrorBoundary from "components/errorboundry";
 import themes from "utils/styles/themes";
 import QuickLaunch from "components/quicklaunch";
 import { getStoredProvider, searchProviders } from "components/widgets/search/search";
+
 
 const ThemeToggle = dynamic(() => import("components/toggles/theme"), {
   ssr: false,
@@ -174,6 +176,7 @@ function Home({ initialSettings }) {
   const { settings, setSettings } = useContext(SettingsContext);
   const { activeTab, setActiveTab } = useContext(TabContext);
   const { asPath } = useRouter();
+  const { data: session } = useSession({ required: true });
 
   useEffect(() => {
     setSettings(initialSettings);
@@ -284,7 +287,7 @@ function Home({ initialSettings }) {
               className={classNames(
                 "sm:flex rounded-md bg-theme-100/20 dark:bg-white/5",
                 settings.cardBlur !== undefined &&
-                  `backdrop-blur${settings.cardBlur.length ? "-" : ""}${settings.cardBlur}`,
+                `backdrop-blur${settings.cardBlur.length ? "-" : ""}${settings.cardBlur}`,
               )}
               id="myTab"
               data-tabs-toggle="#myTabContent"
@@ -307,6 +310,7 @@ function Home({ initialSettings }) {
                   layout={settings.layout?.[group.name]}
                   fiveColumns={settings.fiveColumns}
                   disableCollapse={settings.disableCollapse}
+                  access={settings.groups}
                 />
               ) : (
                 <BookmarksGroup
@@ -314,6 +318,7 @@ function Home({ initialSettings }) {
                   bookmarks={group}
                   layout={settings.layout?.[group.name]}
                   disableCollapse={settings.disableCollapse}
+                  access={settings.groups}
                 />
               ),
             )}
@@ -329,6 +334,7 @@ function Home({ initialSettings }) {
                 layout={settings.layout?.[group.name]}
                 fiveColumns={settings.fiveColumns}
                 disableCollapse={settings.disableCollapse}
+                access={settings.groups}
               />
             ))}
           </div>
@@ -341,6 +347,7 @@ function Home({ initialSettings }) {
                 bookmarks={group}
                 layout={settings.layout?.[group.name]}
                 disableCollapse={settings.disableCollapse}
+                access={settings.groups}
               />
             ))}
           </div>
@@ -356,8 +363,13 @@ function Home({ initialSettings }) {
     settings.fiveColumns,
     settings.disableCollapse,
     settings.cardBlur,
+    settings.groups,
     initialSettings.layout,
   ]);
+
+  if (session && session.user && session.user.groups) {
+    initialSettings.groups = session.user.groups;
+  }
 
   return (
     <>
@@ -408,8 +420,8 @@ function Home({ initialSettings }) {
             "flex flex-row flex-wrap justify-between",
             headerStyles[headerStyle],
             settings.cardBlur !== undefined &&
-              headerStyle === "boxed" &&
-              `backdrop-blur${settings.cardBlur.length ? "-" : ""}${settings.cardBlur}`,
+            headerStyle === "boxed" &&
+            `backdrop-blur${settings.cardBlur.length ? "-" : ""}${settings.cardBlur}`,
           )}
         >
           <div
@@ -426,6 +438,7 @@ function Home({ initialSettings }) {
                       key={i}
                       widget={widget}
                       style={{ header: headerStyle, isRightAligned: false, cardBlur: settings.cardBlur }}
+                      access={settings.groups}
                     />
                   ))}
 
@@ -443,6 +456,7 @@ function Home({ initialSettings }) {
                         key={i}
                         widget={widget}
                         style={{ header: headerStyle, isRightAligned: true, cardBlur: settings.cardBlur }}
+                        access={settings.groups}
                       />
                     ))}
                 </div>
@@ -515,7 +529,7 @@ export default function Wrapper({ initialSettings, fallback }) {
           className={classNames(
             "fixed overflow-auto w-full h-full",
             backgroundBlur &&
-              `backdrop-blur${initialSettings.background.blur.length ? "-" : ""}${initialSettings.background.blur}`,
+            `backdrop-blur${initialSettings.background.blur.length ? "-" : ""}${initialSettings.background.blur}`,
             backgroundSaturate && `backdrop-saturate-${initialSettings.background.saturate}`,
             backgroundBrightness && `backdrop-brightness-${initialSettings.background.brightness}`,
           )}
